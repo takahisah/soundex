@@ -1,0 +1,5 @@
+{
+	"ImportPath": "soundex",
+	"GoVersion": "go1.4.2",
+	"Deps": []
+}
