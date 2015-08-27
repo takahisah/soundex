@@ -45,6 +45,7 @@ func home(res http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(res, pageBottom)
 }
 
+// TODO: write this function
 func soundex(name string) string {
 	return "write soundex func"
 }
