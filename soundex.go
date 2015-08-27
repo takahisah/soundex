@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -45,9 +47,61 @@ func home(res http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(res, pageBottom)
 }
 
-// TODO: write this function
 func soundex(name string) string {
-	return "write soundex func"
+	firstLetter := name[:1]
+	remainingLetters := name[1:]
+
+	//TODO: rule 3
+
+	// drop all vowels
+	for _, vowel := range []string{"a", "e", "i", "o", "u", "y", "h", "w"} {
+		remainingLetters = strings.Replace(remainingLetters, vowel, "", -1)
+	}
+
+	// replace consonants
+	consonantMapping := map[rune]int{
+		'b': 1,
+		'f': 1,
+		'p': 1,
+		'v': 1,
+		'c': 2,
+		'g': 2,
+		'j': 2,
+		'k': 2,
+		'q': 2,
+		's': 2,
+		'x': 2,
+		'z': 2,
+		'd': 3,
+		't': 3,
+		'l': 4,
+		'm': 5,
+		'n': 5,
+		'r': 6,
+	}
+
+	var digits int
+	for _, consonant := range remainingLetters {
+		digits = digits*10 + consonantMapping[consonant]
+	}
+
+	// collapse numbers
+	numStrings := strconv.Itoa(digits)
+	var prevRune rune
+	var collapsed string
+
+	for _, num := range numStrings {
+		if num != prevRune {
+			prevRune = num
+			collapsed += string(num)
+		}
+	}
+
+	if len(collapsed) >= 3 {
+		return firstLetter + collapsed[:3]
+	} else {
+		return firstLetter + collapsed + strings.Repeat("0", 3-len(collapsed))
+	}
 }
 
 func processRequest(req *http.Request) (string, string, bool) {
