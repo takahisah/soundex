@@ -4,12 +4,22 @@ import (
 	"testing"
 )
 
-func TestSoundexAlgorithm(t *testing.T) {
-	name := "Robert"
-	expectedSoundex := "R163"
+var testCases = map[string]string{
+	"Robert":    "R163",
+	"Ashcroft":  "A261",
+	"Tymczak":   "T522",
+	"Pfister":   "P236",
+	"Burroughs": "B620",
+	"Ellery":    "E460",
+	"Example":   "E251",
+	"Gauss":     "G200",
+}
 
-	if soundex(name) != expectedSoundex {
-		t.Errorf("soundex(%v) was '%v', expected '%v'",
-			name, soundex(name), expectedSoundex)
+func TestSoundexAlgorithm(t *testing.T) {
+	for name, expectedSoundex := range testCases {
+		if soundex(name) != expectedSoundex {
+			t.Errorf("soundex(%v) was '%v', expected '%v'",
+				name, soundex(name), expectedSoundex)
+		}
 	}
 }

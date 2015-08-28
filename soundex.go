@@ -8,6 +8,28 @@ import (
 	"strings"
 )
 
+// replace consonants
+var consonantMapping = map[rune]int{
+	'b': 1,
+	'f': 1,
+	'p': 1,
+	'v': 1,
+	'c': 2,
+	'g': 2,
+	'j': 2,
+	'k': 2,
+	'q': 2,
+	's': 2,
+	'x': 2,
+	'z': 2,
+	'd': 3,
+	't': 3,
+	'l': 4,
+	'm': 5,
+	'n': 5,
+	'r': 6,
+}
+
 const (
 	pageTop = `<!DOCTYPE HTML><html><head>
 <style>.error{color:#FF0000;}</style></head><title>Statistics</title>
@@ -47,56 +69,68 @@ func home(res http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(res, pageBottom)
 }
 
-func soundex(name string) string {
-	firstLetter := name[:1]
-	remainingLetters := name[1:]
+func shortenName(name string) string {
+	var prevRune rune
+	var shortenedName string
 
-	//TODO: rule 3
+	for _, c := range name {
+		if c != prevRune {
+			prevRune = c
+			shortenedName += string(c)
+		}
+	}
+
+	return shortenedName
+}
+
+func soundex(name string) string {
+	shortenedName := shortenName(name)
+
+	firstLetter := shortenedName[:1]
+	remainingLetters := shortenedName[1:]
 
 	// drop all vowels
-	for _, vowel := range []string{"a", "e", "i", "o", "u", "y", "h", "w"} {
-		remainingLetters = strings.Replace(remainingLetters, vowel, "", -1)
+	for _, vowel := range []string{"a", "e", "i", "o", "u", "y"} {
+		remainingLetters = strings.Replace(remainingLetters, vowel, "*", -1)
 	}
 
-	// replace consonants
-	consonantMapping := map[rune]int{
-		'b': 1,
-		'f': 1,
-		'p': 1,
-		'v': 1,
-		'c': 2,
-		'g': 2,
-		'j': 2,
-		'k': 2,
-		'q': 2,
-		's': 2,
-		'x': 2,
-		'z': 2,
-		'd': 3,
-		't': 3,
-		'l': 4,
-		'm': 5,
-		'n': 5,
-		'r': 6,
+	for _, hw := range []string{"h", "w"} {
+		remainingLetters = strings.Replace(remainingLetters, hw, "|", -1)
 	}
 
-	var digits int
+	var digits string
 	for _, consonant := range remainingLetters {
-		digits = digits*10 + consonantMapping[consonant]
+		if consonant == '*' || consonant == '|' {
+			digits += string(consonant)
+		} else {
+			digits += strconv.Itoa(consonantMapping[consonant])
+		}
+	}
+
+	// first letter check
+	i, err := strconv.Atoi(digits[:1])
+	if err == nil {
+		if consonantMapping[[]rune(strings.ToLower(firstLetter))[0]] == i {
+			digits = digits[1:]
+		}
 	}
 
 	// collapse numbers
-	numStrings := strconv.Itoa(digits)
 	var prevRune rune
 	var collapsed string
 
-	for _, num := range numStrings {
-		if num != prevRune {
+	for _, num := range digits {
+		if num == '*' {
+			prevRune = num
+		} else if num == '|' {
+			// skip
+		} else if num != prevRune {
 			prevRune = num
 			collapsed += string(num)
 		}
 	}
 
+	// return all digits or fill rest with zeros
 	if len(collapsed) >= 3 {
 		return firstLetter + collapsed[:3]
 	} else {
