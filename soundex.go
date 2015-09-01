@@ -139,7 +139,16 @@ func soundex(name string) string {
 }
 
 func processRequest(req *http.Request) (string, string, bool) {
-	return "name", "success", true
+	var name string
+
+	if slice, found := req.Form["name"]; found && len(slice) > 0 {
+		// do soundex
+	}
+	if len(name) == 0 {
+		return name, "", false // no data first time shown
+	}
+
+	return name, "", true
 }
 
 func formatSoundex(code string) string {
