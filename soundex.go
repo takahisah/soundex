@@ -32,7 +32,7 @@ var consonantMapping = map[rune]int{
 
 const (
 	pageTop = `<!DOCTYPE HTML><html><head>
-<style>.error{color:#FF0000;}</style></head><title>Statistics</title>
+<style>.error{color:#FF0000;}</style></head><title>Soundex</title>
 <body><h3>Soundex</h3>
 <p>Converts name to soundex</p>`
 	form = `<form action="/" method="POST">
@@ -143,6 +143,7 @@ func processRequest(req *http.Request) (string, string, bool) {
 
 	if slice, found := req.Form["name"]; found && len(slice) > 0 {
 		// do soundex
+		name = slice[0]
 	}
 	if len(name) == 0 {
 		return name, "", false // no data first time shown
