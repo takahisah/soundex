@@ -9,26 +9,25 @@ import (
 	"strings"
 )
 
-// replace consonants
-var consonantMapping = map[rune]int{
-	'b': 1,
-	'f': 1,
-	'p': 1,
-	'v': 1,
-	'c': 2,
-	'g': 2,
-	'j': 2,
-	'k': 2,
-	'q': 2,
-	's': 2,
-	'x': 2,
-	'z': 2,
-	'd': 3,
-	't': 3,
-	'l': 4,
-	'm': 5,
-	'n': 5,
-	'r': 6,
+var numToConsonant = [][]rune{
+	[]rune{'b', 'f', 'p', 'v'},
+	[]rune{'c', 'g', 'j', 'k', 'q', 's', 'x', 'z'},
+	[]rune{'d', 't'},
+	[]rune{'l'},
+	[]rune{'m', 'n'},
+	[]rune{'r'},
+}
+
+var consonantMapping = invertRuneArray(numToConsonant)
+
+func invertRuneArray(matrix [][]rune) map[rune]int {
+	var invertedArray = make(map[rune]int)
+	for i, runeArr := range numToConsonant {
+		for _, c := range runeArr {
+			invertedArray[c] = i + 1
+		}
+	}
+	return invertedArray
 }
 
 const (
@@ -75,9 +74,7 @@ func genSoundexMappings(names []string) map[string]string {
 	for _, name := range names {
 		mapping[name] = soundex(name)
 	}
-
 	return mapping
-
 }
 
 func shortenName(name string) string {
@@ -101,13 +98,16 @@ func soundex(name string) string {
 	remainingLetters := shortenedName[1:]
 
 	// drop all vowels
-	for _, vowel := range []string{"a", "e", "i", "o", "u", "y"} {
-		remainingLetters = strings.Replace(remainingLetters, vowel, "*", -1)
+	vowelReplacement := func(char rune) rune {
+		if char == 'a' || char == 'e' || char == 'i' || char == 'o' || char == 'u' || char == 'y' {
+			return '*'
+		} else if char == 'h' || char == 'w' {
+			return '|'
+		}
+		return char
 	}
 
-	for _, hw := range []string{"h", "w"} {
-		remainingLetters = strings.Replace(remainingLetters, hw, "|", -1)
-	}
+	remainingLetters = strings.Map(vowelReplacement, remainingLetters)
 
 	var digits string
 	for _, consonant := range remainingLetters {
