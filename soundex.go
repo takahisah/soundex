@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -59,14 +60,24 @@ func home(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Fprintf(res, anError, err)
 	} else {
-		if name, message, ok := processRequest(req); ok {
-			soundexCode := soundex(name)
-			fmt.Fprint(res, formatSoundex(soundexCode))
+		if names, message, ok := processRequest(req); ok {
+			soundexMappings := genSoundexMappings(names)
+			fmt.Fprint(res, formatSoundex(soundexMappings))
 		} else if message != "" {
 			fmt.Fprintf(res, anError, message)
 		}
 	}
 	fmt.Fprint(res, pageBottom)
+}
+
+func genSoundexMappings(names []string) map[string]string {
+	mapping := make(map[string]string)
+	for _, name := range names {
+		mapping[name] = soundex(name)
+	}
+
+	return mapping
+
 }
 
 func shortenName(name string) string {
@@ -138,20 +149,30 @@ func soundex(name string) string {
 	}
 }
 
-func processRequest(req *http.Request) (string, string, bool) {
-	var name string
+func processRequest(req *http.Request) ([]string, string, bool) {
+	var names []string
 
 	if slice, found := req.Form["name"]; found && len(slice) > 0 {
-		// do soundex
-		name = slice[0]
-	}
-	if len(name) == 0 {
-		return name, "", false // no data first time shown
+		text := strings.Replace(slice[0], ",", " ", -1)
+		var validName = regexp.MustCompile(`^[A-Z][a-z]*`)
+
+		for _, field := range strings.Fields(text) {
+			if validName.MatchString(field) {
+				names = append(names, field)
+			} else {
+				return names, "'" + field + "'" + "is invalid name", false
+			}
+		}
 	}
 
-	return name, "", true
+	if len(names) == 0 {
+		return names, "", false // no data first time shown
+	}
+
+	return names, "", true
 }
 
-func formatSoundex(code string) string {
-	return code
+//TODO: Pretty formatting of map to html table
+func formatSoundex(code map[string]string) string {
+	return fmt.Sprintf("<p>%v</p>", code)
 }
