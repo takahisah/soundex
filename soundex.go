@@ -160,7 +160,7 @@ func processRequest(req *http.Request) ([]string, string, bool) {
 			if validName.MatchString(field) {
 				names = append(names, field)
 			} else {
-				return names, "'" + field + "'" + "is invalid name", false
+				return names, "'" + field + "'" + " is an invalid name", false
 			}
 		}
 	}
@@ -172,7 +172,19 @@ func processRequest(req *http.Request) ([]string, string, bool) {
 	return names, "", true
 }
 
-//TODO: Pretty formatting of map to html table
 func formatSoundex(code map[string]string) string {
-	return fmt.Sprintf("<p>%v</p>", code)
+	var table string
+	tableHead := `<table border="1">
+<tr><th>Name</th><th>Soundex</th></tr>`
+	tableEnd := `</table>`
+
+	table += tableHead
+
+	for name, soundex := range code {
+		table += fmt.Sprintf("<tr><td>%s</td><td>%s</td></tr>", name, soundex)
+	}
+
+	table += tableEnd
+
+	return table
 }

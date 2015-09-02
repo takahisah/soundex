@@ -24,7 +24,10 @@ Source: [Programming in Go](http://www.qtrac.eu/gobook.html) chapter 3 exercise 
 ## Setup
 
 	go get https://github.com/takahisah/soundex.git
-	PATH=5000 soundex
+	export HOST=localhost
+	export PATH=5000
+	go build
+	./soundex
 
 ## Deploy
 
