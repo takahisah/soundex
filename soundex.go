@@ -35,6 +35,8 @@ const (
 <style>.error{color:#FF0000;}</style></head><title>Soundex</title>
 <body><h3>Soundex</h3>
 <p>Converts name to soundex</p>`
+	testPageTop = `<!DOCTYPE HTML><html><head>
+<style>.error{color:#FF0000;}</style></head><title>Soundex Test</title>`
 	form = `<form action="/" method="POST">
 <label for="name">Name:</label><br />
 <input type="text" name="name" size="30"><br />
@@ -46,6 +48,7 @@ const (
 
 func main() {
 	http.HandleFunc("/", home)
+	http.HandleFunc("test", test)
 	fmt.Println("listening...")
 	err := http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 	if err != nil {
@@ -67,6 +70,12 @@ func home(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 	fmt.Fprint(res, pageBottom)
+}
+
+func test(res http.ResponseWriter, req *http.Request) {
+	fmt.Fprint(res, testPageTop)
+
+	// read in test cases
 }
 
 func genSoundexMappings(names []string) map[string]string {
