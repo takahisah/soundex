@@ -106,6 +106,9 @@ func soundex(name string) string {
 	firstLetter := shortenedName[:1]
 	remainingLetters := shortenedName[1:]
 
+	// strip apostrophe
+	remainingLetters = strings.Replace(remainingLetters, "'", "", -1)
+
 	// drop all vowels
 	vowelReplacement := func(char rune) rune {
 		if char == 'a' || char == 'e' || char == 'i' || char == 'o' || char == 'u' || char == 'y' {
